@@ -2,45 +2,32 @@ from typing import Any
 
 from astrbot.api import logger
 
-from .client import GSVApiClient, GSVRequestResult
 from .config import PluginConfig
 from .local_data import LocalDataManager
+from .providers.base import BaseTTSProvider
+from .result import TTSResult
 
 
 class GPTSoVITSService:
+    """TTS 推理服务层（提供商无关，缓存编排不变）。"""
+
     def __init__(
         self,
         config: PluginConfig,
-        client: GSVApiClient,
+        provider: BaseTTSProvider,
         local_data: LocalDataManager,
     ):
-        self.cfg = config.model
-        self.default_params = config.default_params
-        self.client = client
+        self.cfg = config
+        self.provider = provider
         self.local_data = local_data
-
-    async def load_model(self):
-        if self.cfg.gpt_path:
-            result = await self.client.set_gpt_weights(self.cfg.gpt_path)
-            if result.ok:
-                logger.info(f"GPT 模型已加载: {self.cfg.gpt_path}")
-            else:
-                logger.error(f"GPT 模型加载失败: {result.error}")
-
-        if self.cfg.sovits_path:
-            result = await self.client.set_sovits_weights(self.cfg.sovits_path)
-            if result.ok:
-                logger.info(f"SoVITS 模型已加载: {self.cfg.sovits_path}")
-            else:
-                logger.error(f"SoVITS 模型加载失败: {result.error}")
 
     async def inference(
         self,
         text: str,
         extra_params: dict[str, Any] | None = None,
-    ) -> GSVRequestResult:
-        """TTS 推理"""
-        params = self.default_params.copy()
+    ) -> TTSResult:
+        """TTS 推理（缓存编排原样保留）。"""
+        params = self.provider.default_params()
         if text:
             params["text"] = text
 
@@ -55,15 +42,15 @@ class GPTSoVITSService:
         if cached_audio:
             cache_path, cached_data = cached_audio
             logger.debug("命中缓存，跳过 TTS 请求")
-            return GSVRequestResult(
+            return TTSResult(
                 ok=True,
                 data=cached_data,
                 text=str(params.get("text", "")),
                 file_path=str(cache_path),
             )
 
-        logger.debug(f"向 GSV 发起 TTS 请求，参数: {params}")
-        result = await self.client.tts(params)
+        logger.debug(f"向 TTS 提供商发起请求，参数: {params}")
+        result = await self.provider.tts(params)
 
         if bool(result):
             cache_path = self.local_data.save_audio(result.data, params)
@@ -75,6 +62,6 @@ class GPTSoVITSService:
         return result
 
     async def restart(self):
-        result = await self.client.restart()
+        result = await self.provider.restart()
         if not result.ok:
             logger.error(f"重启失败: {result.error}")

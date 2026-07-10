@@ -34,8 +34,8 @@ class LocalDataManager:
         # 计算 hash
         cache_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
-        # 解析扩展名
-        ext = str(params.get("media_type", "wav")).lower()
+        # 解析扩展名（兼容 GSV 的 media_type 与 Fish 的 format）
+        ext = str(params.get("format") or params.get("media_type", "wav")).lower()
         if ext not in {"wav", "mp3", "ogg"}:
             ext = "wav"
 

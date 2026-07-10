@@ -2,13 +2,27 @@
     "enabled": {
         "description": "总开关",
         "type": "bool",
-        "hint": "GPT-SoVITS 插件总开关，请在部署好 GPT-SoVITS 后再打开此开关",
+        "hint": "TTS 插件总开关",
         "default": true
     },
+    "provider": {
+        "description": "TTS 提供商",
+        "type": "string",
+        "hint": "选择语音合成服务提供商。gpt_sovits 需自行部署本地服务；fish_audio 为云端 API（需 API Key 与网络代理）",
+        "options": [
+            "gpt_sovits",
+            "fish_audio"
+        ],
+        "labels": [
+            "GPT-SoVITS（本地部署）",
+            "Fish Audio（云端 API）"
+        ],
+        "default": "gpt_sovits"
+    },
     "auto": {
-        "description": "调用配置",
+        "description": "自动转语音配置（提供商通用）",
         "type": "object",
-        "hint": "本插件有一定概率主动将bot本来要发送的文本转成语音发送",
+        "hint": "本插件有一定概率主动将bot本来要发送的文本转成语音发送。注意：Fish Audio 提供商下走同样的翻译+打标流程（整段回复变成日语语音并按字节计费），调味型部署建议将概率设为 0",
         "items": {
             "only_llm_result": {
                 "description": "只处理LLM结果",
@@ -41,9 +55,9 @@
         }
     },
     "client": {
-        "description": "客户端配置",
+        "description": "【仅 GPT-SoVITS】客户端配置",
         "type": "object",
-        "hint": "",
+        "hint": "仅在提供商选择 GPT-SoVITS 时生效",
         "items": {
             "base_url": {
                 "description": "GPT-SoVITS API 的 URL",
@@ -65,28 +79,28 @@
         }
     },
     "model": {
-        "description": "模型配置",
+        "description": "【仅 GPT-SoVITS】模型配置",
         "type": "object",
-        "hint": "",
+        "hint": "仅在提供商选择 GPT-SoVITS 时生效",
         "items": {
             "gpt_path": {
                 "description": "GPT模型文件路径",
                 "type": "string",
-                "hint": "即“.ckpt”后缀的文件。请使用 “/” 分隔路径，支持绝对路径和相对路径。请确保该文件与部署的GSV在同一台机子上。不填则默认用 GPT_SoVITS 内置 GPT 模型",
+                "hint": "即\u201c.ckpt\u201d后缀的文件。请使用 \u201c/\u201d 分隔路径，支持绝对路径和相对路径。请确保该文件与部署的GSV在同一台机子上。不填则默认用 GPT_SoVITS 内置 GPT 模型",
                 "default": ""
             },
             "sovits_path": {
                 "description": "SoVITS模型文件路径",
                 "type": "string",
-                "hint": "即“.pth”后缀的文件。请使用 “/” 分隔路径，支持绝对路径和相对路径。请确保该文件与部署的GSV在同一台机子上。不填则默认用 GPT_SoVITS 内置 SoVITS 模型",
+                "hint": "即\u201c.pth\u201d后缀的文件。请使用 \u201c/\u201d 分隔路径，支持绝对路径和相对路径。请确保该文件与部署的GSV在同一台机子上。不填则默认用 GPT_SoVITS 内置 SoVITS 模型",
                 "default": ""
             }
         }
     },
     "default_params": {
-        "description": "TTS默认参数",
+        "description": "【仅 GPT-SoVITS】TTS默认参数",
         "type": "object",
-        "hint": "这些参数将用于每次语音合成请求，可根据需要调整",
+        "hint": "仅在提供商选择 GPT-SoVITS 时生效。这些参数将用于每次语音合成请求",
         "items": {
             "text": {
                 "description": "要转换为语音的文本",
@@ -115,7 +129,7 @@
             "ref_audio_path": {
                 "description": "参考音频路径",
                 "type": "string",
-                "hint": "用于音色克隆，请使用 “/” 分隔路径，支持 wav 格式，必填。请确保该文件与部署的GSV在同一台机子上。",
+                "hint": "用于音色克隆，请使用 \u201c/\u201d 分隔路径，支持 wav 格式，必填。请确保该文件与部署的GSV在同一台机子上。",
                 "default": "data/plugins/astrbot_plugin_GPT_SoVITS/default_audio/就算是这样，也不至于直接碎掉啊，除非.wav"
             },
             "prompt_text": {
@@ -290,8 +304,8 @@
         }
     },
     "judge": {
-        "description": "LLM 配置",
-        "hint": "",
+        "description": "【仅 GPT-SoVITS】情绪判别 LLM 配置",
+        "hint": "仅在提供商选择 GPT-SoVITS 时生效（Fish Audio 的情绪走行内标签体系，见 fish_tagging）",
         "type": "object",
         "items": {
             "enabled_llm": {
@@ -310,13 +324,13 @@
         }
     },
     "cache": {
-        "description": "缓存配置",
+        "description": "缓存配置（提供商通用）",
         "type": "object",
-        "hint": "",
+        "hint": "缓存 key 为请求参数哈希，不同提供商/模型/声线自动区分",
         "items": {
             "enabled": {
                 "description": "启用语音缓存",
-                "hint": "开启后，请求参数一致时直接复用本地缓存音频，减少重复推理",
+                "hint": "开启后，请求参数一致时直接复用本地缓存音频，减少重复推理/计费",
                 "type": "bool",
                 "default": true
             },
@@ -333,15 +347,15 @@
             },
             "path": {
                 "description": "缓存路径",
-                "hint": "请使用 “/” 分隔路径，支持绝对路径和相对路径；留空时默认 data/plugins_data/astrbot_plugin_GPT_SoVITS/audio",
+                "hint": "请使用 \u201c/\u201d 分隔路径，支持绝对路径和相对路径；留空时默认 data/plugins_data/astrbot_plugin_GPT_SoVITS/audio",
                 "type": "string",
                 "default": "data/plugins_data/astrbot_plugin_GPT_SoVITS/audio"
             }
         }
     },
     "entry_storage": {
-        "description": "情绪参数配置",
-        "hint": "可自定义多套情绪参数，并定义对应触发词。由此实现不同情绪的语音",
+        "description": "【仅 GPT-SoVITS】情绪参数配置",
+        "hint": "仅在提供商选择 GPT-SoVITS 时生效。可自定义多套情绪参数，并定义对应触发词。由此实现不同情绪的语音",
         "type": "template_list",
         "templates": {
             "default": {
@@ -362,7 +376,7 @@
                     "ref_audio_path": {
                         "description": "参考音频文件路径",
                         "type": "string",
-                        "hint": "请使用 “/” 分隔路径，支持绝对路径和相对路径",
+                        "hint": "请使用 \u201c/\u201d 分隔路径，支持绝对路径和相对路径",
                         "default": ""
                     },
                     "prompt_text": {
@@ -412,6 +426,295 @@
                         "default": 0.7
                     }
                 }
+            }
+        }
+    },
+    "fish_audio": {
+        "description": "【仅 Fish Audio】提供商核心配置",
+        "type": "object",
+        "hint": "仅在提供商选择 Fish Audio 时生效",
+        "items": {
+            "api_key": {
+                "description": "API Key",
+                "type": "string",
+                "hint": "必填。在 https://fish.audio/developers/ 申请。注意：API 余额（pay-as-you-go）与网页端订阅 credits 是两套独立的账，需在开发者后台单独充值",
+                "default": ""
+            },
+            "base_url": {
+                "description": "API 基础地址",
+                "type": "string",
+                "hint": "默认官方直连。使用第三方中转/自建反代时修改此项",
+                "default": "https://api.fish.audio"
+            },
+            "tts_model": {
+                "description": "TTS 模型名（请求头 model 的值）",
+                "type": "string",
+                "hint": "已知可用值：s1、s2-pro（以官方文档为准，可能有 s2.1 系新模型）。注意：S2 系用 [方括号] 自由格式情绪标签；S1 用 (圆括号) 固定词表，两者不通用，改此项时需确认 fish_tagging 产出的标签语法匹配",
+                "default": "s2-pro"
+            },
+            "format": {
+                "description": "输出音频格式",
+                "type": "string",
+                "hint": "mp3 已实测可用，协议端会自行转码",
+                "options": [
+                    "mp3",
+                    "wav",
+                    "opus"
+                ],
+                "default": "mp3"
+            },
+            "normalize": {
+                "description": "文本规范化",
+                "type": "bool",
+                "hint": "开启后由服务端规范化数字、符号等的读法，建议开启",
+                "default": true
+            },
+            "chunk_length": {
+                "description": "分块长度",
+                "type": "int",
+                "hint": "服务端文本分块参数，影响长文本处理",
+                "slider": {
+                    "min": 100,
+                    "max": 300,
+                    "step": 10
+                },
+                "default": 200
+            },
+            "latency": {
+                "description": "延迟模式",
+                "type": "string",
+                "hint": "normal 质量优先，balanced 速度优先",
+                "options": [
+                    "normal",
+                    "balanced"
+                ],
+                "default": "normal"
+            },
+            "clone_mode": {
+                "description": "声线克隆模式",
+                "type": "string",
+                "hint": "pvc：使用已建好的持久化模型（reference_id，需账号有可用私有槽位）；ivc：每次请求内联参考音频（不占槽位，请求体更大更慢，官方正规路径）。订阅试用到期后若 PVC 失效，切到 ivc 即可，无需改代码",
+                "options": [
+                    "pvc",
+                    "ivc"
+                ],
+                "labels": [
+                    "PVC 持久化模型",
+                    "IVC 即时内联克隆"
+                ],
+                "default": "pvc"
+            },
+            "reference_id": {
+                "description": "【PVC 模式】声线模型 ID",
+                "type": "string",
+                "hint": "建模型接口（POST /model）返回的 _id",
+                "default": ""
+            },
+            "ivc_audio_path": {
+                "description": "【IVC 模式】参考音频本地路径",
+                "type": "string",
+                "hint": "wav/mp3，建议 10~30 秒干净人声。请使用 \u201c/\u201d 分隔路径",
+                "default": ""
+            },
+            "ivc_ref_text": {
+                "description": "【IVC 模式】参考音频的逐字转写",
+                "type": "string",
+                "hint": "参考音频里说的原话（日语逐字转写），与音频一起内联进请求",
+                "default": ""
+            },
+            "pvc_auto_fallback": {
+                "description": "PVC 失败自动降级 IVC",
+                "type": "bool",
+                "hint": "PVC 模式下 reference_id 被拒（如试用到期）时，若已配置 IVC 素材则自动降级为 IVC 重试一次，并在日志告警",
+                "default": false
+            },
+            "proxy": {
+                "description": "网络代理",
+                "type": "string",
+                "hint": "留空则直连。SOCKS5 请保留 socks5h 前缀（h 表示 DNS 也走代理，实测必需）；HTTP 代理写 http://...",
+                "default": "socks5h://127.0.0.1:10808"
+            },
+            "timeout": {
+                "description": "请求超时（秒）",
+                "type": "int",
+                "hint": "实测约 60 字文本合成耗时 17 秒左右，勿设太短",
+                "slider": {
+                    "min": 30,
+                    "max": 180,
+                    "step": 1
+                },
+                "default": 60
+            },
+            "max_concurrency": {
+                "description": "最大并发请求数",
+                "type": "int",
+                "hint": "账号侧硬上限见响应头 Ratelimit-Limit-Concurrency（当前档位为 5），插件内建议留余量",
+                "slider": {
+                    "min": 1,
+                    "max": 5,
+                    "step": 1
+                },
+                "default": 2
+            },
+            "retry_times": {
+                "description": "失败重试次数",
+                "type": "int",
+                "hint": "网络类错误的自动重试次数（402 余额不足等业务错误不重试）",
+                "slider": {
+                    "min": 0,
+                    "max": 3,
+                    "step": 1
+                },
+                "default": 1
+            },
+            "extra_body": {
+                "description": "额外请求体参数（JSON）",
+                "type": "string",
+                "hint": "高级选项。JSON 字符串，解析后合并进请求体，用于官方将来新增的参数，无需改代码。留空或 {} 表示不使用",
+                "default": "{}"
+            }
+        }
+    },
+    "fish_gateway": {
+        "description": "【仅 Fish Audio】日语网关（跨语种兜底）",
+        "type": "object",
+        "hint": "零样本克隆跨语种合成质量差（实测日→中稀碎），本层保证送进 TTS 的文本一律为目标语言。工具 docstring 已要求 LLM 传日语，本层是针对\u201c模型顺手填中文参数\u201d这一常见错误的保险",
+        "items": {
+            "enabled": {
+                "description": "启用语言兜底翻译",
+                "type": "bool",
+                "hint": "开启后，检测到非目标语言的文本会先经 LLM 翻译。关闭则完全信任工具调用方传入的语言（有跨语种翻车风险）",
+                "default": true
+            },
+            "target_lang": {
+                "description": "目标语言",
+                "type": "string",
+                "hint": "当前声线为日语参考音频，强烈建议保持 ja。将来换声线或新模型跨语种能力改善后再调整",
+                "default": "ja"
+            },
+            "skip_llm_if_target_lang": {
+                "description": "已是目标语言时跳过 LLM",
+                "type": "bool",
+                "hint": "仅在打标（fish_tagging）关闭时有意义：本地启发式检测到文本已是目标语言则跳过 LLM 调用直送合成，省一次 LLM 开销。打标开启时无论如何都要过一次 LLM，此项无效",
+                "default": true
+            }
+        }
+    },
+    "fish_tagging": {
+        "description": "【仅 Fish Audio】情绪标签标注",
+        "type": "object",
+        "hint": "官方无自动打标 API（网页端的标签补全是应用层功能未开放），此为 LLM 平替。与 fish_gateway 的翻译合并为一次 LLM 调用完成。注意标签计入 text 字段的 UTF-8 字节计费",
+        "items": {
+            "enabled": {
+                "description": "启用自动打标",
+                "type": "bool",
+                "hint": "开启后由 LLM 在文本中插入 [方括号] 情绪标签（S2 系语法）。关闭则文本不加工直送（仍可能经过网关翻译）",
+                "default": true
+            },
+            "max_tags": {
+                "description": "单次标签数上限",
+                "type": "int",
+                "hint": "官方建议 2~4 个为宜，过度堆叠互相打架且增加计费字节",
+                "slider": {
+                    "min": 1,
+                    "max": 8,
+                    "step": 1
+                },
+                "default": 4
+            },
+            "provider_id": {
+                "description": "翻译/打标用的 LLM 提供商",
+                "type": "string",
+                "hint": "留空或填写的提供商不存在时，使用当前会话正在使用的 LLM 提供商。tip：任务简单（翻译+插标签），建议指定稳定便宜快速的小模型，与主对话模型分离",
+                "default": "",
+                "_special": "select_provider"
+            },
+            "custom_prompt": {
+                "description": "自定义打标 Prompt 模板",
+                "type": "text",
+                "hint": "高级选项。留空使用内置模板。支持占位符 {text}（待处理文本）、{max_tags}（标签数上限）、{target_lang}（目标语言）。内置模板已包含官方标签规则（作用域、叠加、避免矛盾组合等），修改前请先读懂内置模板",
+                "default": ""
+            },
+            "fail_policy": {
+                "description": "预处理失败策略",
+                "type": "string",
+                "hint": "翻译/打标的 LLM 调用失败时：abort=放弃本次语音并把错误回传给主 LLM（质量优先，推荐）；raw=用原始文本直接合成（可用性优先，但若原文是中文会产出跨语种劣化语音）",
+                "options": [
+                    "abort",
+                    "raw"
+                ],
+                "labels": [
+                    "放弃发语音",
+                    "原文直送合成"
+                ],
+                "default": "abort"
+            }
+        }
+    },
+    "fish_tool": {
+        "description": "【仅 Fish Audio】LLM 工具层（send_voice）",
+        "type": "object",
+        "hint": "控制 send_voice 工具的行为边界与费用护栏",
+        "items": {
+            "enabled": {
+                "description": "启用 send_voice 工具",
+                "type": "bool",
+                "hint": "关闭后工具对 LLM 调用返回未启用提示（指令与自动模式不受影响）",
+                "default": true
+            },
+            "length_limit_enabled": {
+                "description": "启用文本长度限制",
+                "type": "bool",
+                "hint": "开启后，超过 max_text_len 的文本按 overflow_policy 处理。关闭则不做任何长度检查",
+                "default": true
+            },
+            "max_text_len": {
+                "description": "单次文本长度上限（字符）",
+                "type": "int",
+                "hint": "仅在 length_limit_enabled 开启时生效。语音定位是\u201c一两句的点缀\u201d，同时也是费用护栏（按字节计费）",
+                "slider": {
+                    "min": 10,
+                    "max": 300,
+                    "step": 10
+                },
+                "default": 80
+            },
+            "overflow_policy": {
+                "description": "超长处理策略",
+                "type": "string",
+                "hint": "仅在 length_limit_enabled 开启时生效。reject=拒绝并告知 LLM 文本过长（LLM 会自行缩短重试）；truncate=截断到上限后继续合成",
+                "options": [
+                    "reject",
+                    "truncate"
+                ],
+                "labels": [
+                    "拒绝并提示",
+                    "截断合成"
+                ],
+                "default": "reject"
+            },
+            "cooldown_seconds": {
+                "description": "同会话冷却间隔（秒）",
+                "type": "int",
+                "hint": "同一会话两次语音的最短间隔，0 表示不限。防止 LLM 连续调用刷语音",
+                "slider": {
+                    "min": 0,
+                    "max": 600,
+                    "step": 10
+                },
+                "default": 30
+            },
+            "daily_max_calls": {
+                "description": "每日调用上限（次）",
+                "type": "int",
+                "hint": "0 表示不限。费用护栏：达到上限后当日拒绝并提示，次日重置",
+                "default": 0
+            },
+            "send_text_too": {
+                "description": "语音附带原文文本",
+                "type": "bool",
+                "hint": "开启后语音消息之后追加一条日语原文（含标签剥离后的纯文本），便于听不懂时查看",
+                "default": false
             }
         }
     }

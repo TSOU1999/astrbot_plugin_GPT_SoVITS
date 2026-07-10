@@ -136,8 +136,53 @@ class CacheConfig(ConfigNode):
     path: str
 
 
+class FishAudioConfig(ConfigNode):
+    api_key: str
+    base_url: str
+    tts_model: str
+    format: str
+    normalize: bool
+    chunk_length: int
+    latency: str
+    clone_mode: str
+    reference_id: str
+    ivc_audio_path: str
+    ivc_ref_text: str
+    pvc_auto_fallback: bool
+    proxy: str
+    timeout: int
+    max_concurrency: int
+    retry_times: int
+    extra_body: str
+
+
+class GatewayConfig(ConfigNode):
+    enabled: bool
+    target_lang: str
+    skip_llm_if_target_lang: bool
+
+
+class TaggingConfig(ConfigNode):
+    enabled: bool
+    max_tags: int
+    provider_id: str
+    custom_prompt: str
+    fail_policy: str
+
+
+class ToolConfig(ConfigNode):
+    enabled: bool
+    length_limit_enabled: bool
+    max_text_len: int
+    overflow_policy: str
+    cooldown_seconds: int
+    daily_max_calls: int
+    send_text_too: bool
+
+
 class PluginConfig(ConfigNode):
     enabled: bool
+    provider: str
     auto: AutoConfig
     client: ClientConfig
     model: ModelConfig
@@ -145,6 +190,10 @@ class PluginConfig(ConfigNode):
     judge: JudgeConfig
     cache: CacheConfig
     entry_storage: list[dict[str, Any]]
+    fish_audio: FishAudioConfig
+    fish_gateway: GatewayConfig
+    fish_tagging: TaggingConfig
+    fish_tool: ToolConfig
 
     _plugin_name: str = "astrbot_plugin_GPT_SoVITS"
 
