@@ -41,13 +41,14 @@ class GPTSoVITSPlugin(Star):
         self._daily_date: str = ""                    # 当前日期（用于跨日重置）
 
         # ---- 工具激活态（装饰器双注册 + 运行时拨开关） ----
-        tool_mgr = context.get_llm_tool_manager()
+        # 注意：必须走 context.activate_llm_tool()，不能走底层 tool_mgr
+        # Context 封装层会自动传入 star_map；FunctionToolManager 直接调用缺少该参数
         if self.cfg.provider == "gpt_sovits":
-            tool_mgr.activate_llm_tool("gsv_tts")
-            tool_mgr.deactivate_llm_tool("send_voice")
+            context.activate_llm_tool("gsv_tts")
+            context.deactivate_llm_tool("send_voice")
         elif self.cfg.provider == "fish_audio":
-            tool_mgr.deactivate_llm_tool("gsv_tts")
-            tool_mgr.activate_llm_tool("send_voice")
+            context.deactivate_llm_tool("gsv_tts")
+            context.activate_llm_tool("send_voice")
 
     async def initialize(self):
         if self.cfg.enabled:
