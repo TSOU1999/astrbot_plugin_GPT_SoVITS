@@ -612,15 +612,15 @@
                 "default": true
             },
             "max_tags": {
-                "description": "单次标签数上限",
+                "description": "感情切换与声演技类标签上限",
                 "type": "int",
-                "hint": "官方建议 2~4 个为宜，过度堆叠互相打架且增加计费字节",
+                "hint": "仅限制感情切换与声演技类标签数量（[強調] 与 [短い間] 不计入）。新模板标签密度基准不同，建议 10",
                 "slider": {
                     "min": 1,
-                    "max": 8,
+                    "max": 20,
                     "step": 1
                 },
-                "default": 4
+                "default": 10
             },
             "provider_id": {
                 "description": "翻译/打标用的 LLM 提供商",
@@ -632,7 +632,7 @@
             "custom_prompt": {
                 "description": "自定义打标 Prompt 模板",
                 "type": "text",
-                "hint": "高级选项。留空使用内置模板。支持占位符 {text}（待处理文本）、{max_tags}（标签数上限）、{target_lang}（目标语言）。内置模板已包含官方标签规则（作用域、叠加、避免矛盾组合等），修改前请先读懂内置模板",
+                "hint": "高级选项。留空使用内置模板。支持占位符 {text}（待处理文本）、{max_tags}（标签数上限）、{target_lang}（目标语言）。内置模板已适配Fish官方标签机制，修改前请先读懂内置模板",
                 "default": ""
             },
             "fail_policy": {
